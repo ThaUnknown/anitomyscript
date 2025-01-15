@@ -15,14 +15,10 @@ export default async function (file) {
 }
 
 async function parse (file) {
-  if (Array.isArray(file)) {
-    const vector = mapArray(file)
-    const result = mapVector(anitomyModule.parseMultiple(vector))
-    vector.delete()
-    return result.map((each) => elements(each))
-  } else {
-    return elements(anitomyModule.parseSingle(file))
-  }
+  const vector = mapArray(file)
+  const result = mapVector(anitomyModule.parseMultiple(vector))
+  vector.delete()
+  return result.map((each) => elements(each))
 }
 
 function elements (elements) {

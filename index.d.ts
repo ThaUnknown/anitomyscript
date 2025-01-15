@@ -1,4 +1,4 @@
-declare module "anitomyscript" {
+declare module 'anitomyscript' {
   export interface AnitomyResult {
     file_name: string;
     anime_season?: string;
@@ -29,8 +29,8 @@ declare module "anitomyscript" {
   }
 
   function parse(
-    input: string | string[]
-  ): Promise<AnitomyResult[] | AnitomyResult>;
+    input: string[]
+  ): Promise<AnitomyResult[]>;
 
-  export default parse;
+  export default parse
 }
