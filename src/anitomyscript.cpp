@@ -1,87 +1,49 @@
+#include <anitomy/anitomy.hpp>
+#include <anitomy/element.hpp>
 #include <emscripten/bind.h>
+#include <print>
+#include <string>
+#include <string_view>
 #include <vector>
-#include <anitomy/anitomy.h>
 
 using namespace emscripten;
 using namespace anitomy;
 using namespace std;
 
-Elements ParseSingle(string_t filename)
-{
-    Anitomy an;
-    an.Parse(filename);
-    return an.elements();
+Elements ParseSingle(string_t filename) {
+  return parse(filename);
 }
 
-vector<Elements> ParseMultiple(vector<string_t> filenames)
-{
-    Anitomy an;
-    vector<Elements> elements;
-    for (auto filename : filenames)
-    {
-        an.Parse(filename);
-        elements.emplace_back(an.elements());
-    }
-    return elements;
+vector<Elements> ParseMultiple(vector<string_t> filenames) {
+  Anitomy an;
+  vector<Elements> elements;
+  for (auto filename : filenames) {
+    elements.emplace_back(parse(filename));
+  }
+  return elements;
 }
 
-vector<string_t> *StringVectorFromPointer(uintptr_t vec)
-{
-    return reinterpret_cast<vector<string_t> *>(vec);
+vector<string_t> *StringVectorFromPointer(uintptr_t vec) {
+  return reinterpret_cast<vector<string_t> *>(vec);
 }
 
-vector<Elements> *ElementVectorFromPointer(uintptr_t vec)
-{
-    return reinterpret_cast<vector<Elements> *>(vec);
+vector<Elements> *ElementVectorFromPointer(uintptr_t vec) {
+  return reinterpret_cast<vector<Elements> *>(vec);
 }
 
-EMSCRIPTEN_BINDINGS(Anitomy)
-{
-    emscripten::function("parseSingle", &ParseSingle);
-    emscripten::function("parseMultiple", &ParseMultiple);
+EMSCRIPTEN_BINDINGS(Anitomy) {
+  emscripten::function("parseSingle", &ParseSingle);
+  emscripten::function("parseMultiple", &ParseMultiple);
 
-    register_vector<string_t>("StringVector")
-        .constructor(&StringVectorFromPointer, allow_raw_pointers());
+  register_vector<string_t>("StringVector").constructor(&StringVectorFromPointer, allow_raw_pointers());
 
-    register_vector<Elements>("ElementVector")
-        .constructor(&ElementVectorFromPointer, allow_raw_pointers());
+  register_vector<Elements>("ElementVector").constructor(&ElementVectorFromPointer, allow_raw_pointers());
 
-    class_<Elements>("Elements")
-        .constructor<>()
-        .function("size", &Elements::size)
-        .function("empty_capacity", select_overload<bool() const>(&Elements::empty))
-        .function("empty_lookup", select_overload<bool(ElementCategory) const>(&Elements::empty))
-        .function("get", &Elements::get)
-        .function("count", &Elements::count)
-        .function("get_all", &Elements::get_all);
+  enum_<ElementKind>("ElementKind").value("AudioTerm", ElementKind::AudioTerm).value("DeviceCompatibility", ElementKind::DeviceCompatibility).value("Episode", ElementKind::Episode).value("EpisodeTitle", ElementKind::EpisodeTitle).value("FileChecksum", ElementKind::FileChecksum).value("FileExtension", ElementKind::FileExtension).value("Language", ElementKind::Language).value("Other", ElementKind::Other).value("ReleaseGroup", ElementKind::ReleaseGroup).value("ReleaseInformation", ElementKind::ReleaseInformation).value("ReleaseVersion", ElementKind::ReleaseVersion).value("Season", ElementKind::Season).value("Source", ElementKind::Source).value("Subtitles", ElementKind::Subtitles).value("Title", ElementKind::Title).value("Type", ElementKind::Type).value("VideoResolution", ElementKind::VideoResolution).value("VideoTerm", ElementKind::VideoTerm).value("Volume", ElementKind::Volume).value("Year", ElementKind::Year);
 
-    enum_<ElementCategory>("ElementCategory")
-        .value("kElementIterateFirst", ElementCategory::kElementIterateFirst)
-        .value("kElementAnimeSeason", ElementCategory::kElementAnimeSeason)
-        .value("kElementAnimeSeasonPrefix", ElementCategory::kElementAnimeSeasonPrefix)
-        .value("kElementAnimeTitle", ElementCategory::kElementAnimeTitle)
-        .value("kElementAnimeType", ElementCategory::kElementAnimeType)
-        .value("kElementAnimeYear", ElementCategory::kElementAnimeYear)
-        .value("kElementAudioTerm", ElementCategory::kElementAudioTerm)
-        .value("kElementDeviceCompatibility", ElementCategory::kElementDeviceCompatibility)
-        .value("kElementEpisodeNumber", ElementCategory::kElementEpisodeNumber)
-        .value("kElementEpisodeNumberAlt", ElementCategory::kElementEpisodeNumberAlt)
-        .value("kElementEpisodePrefix", ElementCategory::kElementEpisodePrefix)
-        .value("kElementEpisodeTitle", ElementCategory::kElementEpisodeTitle)
-        .value("kElementFileChecksum", ElementCategory::kElementFileChecksum)
-        .value("kElementFileExtension", ElementCategory::kElementFileExtension)
-        .value("kElementFileName", ElementCategory::kElementFileName)
-        .value("kElementLanguage", ElementCategory::kElementLanguage)
-        .value("kElementOther", ElementCategory::kElementOther)
-        .value("kElementReleaseGroup", ElementCategory::kElementReleaseGroup)
-        .value("kElementReleaseInformation", ElementCategory::kElementReleaseInformation)
-        .value("kElementReleaseVersion", ElementCategory::kElementReleaseVersion)
-        .value("kElementSource", ElementCategory::kElementSource)
-        .value("kElementSubtitles", ElementCategory::kElementSubtitles)
-        .value("kElementVideoResolution", ElementCategory::kElementVideoResolution)
-        .value("kElementVideoTerm", ElementCategory::kElementVideoTerm)
-        .value("kElementVolumeNumber", ElementCategory::kElementVolumeNumber)
-        .value("kElementVolumePrefix", ElementCategory::kElementVolumePrefix)
-        .value("kElementIterateLast", ElementCategory::kElementIterateLast)
-        .value("kElementUnknown", ElementCategory::kElementUnknown);
+  // Bind the Element struct
+  value_object<Element>("Element").field("kind", &Element::kind).field("value", &Element::value).field("position", &Element::position);
+
+  // Bind the parse function
+  function("parse", &parse);
 }

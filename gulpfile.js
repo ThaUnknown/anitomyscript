@@ -14,12 +14,10 @@ function build (cb) {
   const isRelease = process.env.NODE_ENV === 'prod'
 
   let spawnArgs = [
-    '--memory-init-file', '0',
-    '-std=c++14',
-    '-fPIC', '-fno-exceptions', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
-    '--bind',
+    '-std=c++23',
+    // '-fPIC', '-fno-exceptions', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
     '-v',
-    '-I', path.resolve('./include'),
+    '-I', path.resolve('./include/include'),
     '-s', 'EXPORT_NAME="anitomyscript"',
     '-s', 'WASM=1',
     '-s', 'ENVIRONMENT=web,node',
@@ -33,17 +31,8 @@ function build (cb) {
     '-s', 'INITIAL_MEMORY=5308416',
     '-s', 'ALLOW_MEMORY_GROWTH=1',
     '--no-heap-copy',
-    path.resolve('./include/anitomy/anitomy.cpp'),
-    path.resolve('./include/anitomy/element.cpp'),
-    path.resolve('./include/anitomy/keyword.cpp'),
-    path.resolve('./include/anitomy/parser.cpp'),
-    path.resolve('./include/anitomy/parser_helper.cpp'),
-    path.resolve('./include/anitomy/parser_number.cpp'),
-    path.resolve('./include/anitomy/string.cpp'),
-    path.resolve('./include/anitomy/token.cpp'),
-    path.resolve('./include/anitomy/tokenizer.cpp'),
-    path.resolve('./src/anitomyscript.cpp'),
-    '-o', out
+    path.resolve('./include/include/anitomy.hpp')
+    // '-o', out
   ]
 
   if (isRelease) {
@@ -56,10 +45,11 @@ function build (cb) {
     ])
   }
 
-  console.log(`Starting ${isRelease ? 'release' : 'debug'} build with emcc args`, spawnArgs)
+  console.log(`Starting ${isRelease ? 'release' : 'debug'} build with emcc args`, { spawnArgs })
   const emccExec = process.platform === 'win32' ? 'emcc.bat' : 'emcc'
   const s = spawn(path.join(emscriptenPath, emccExec), spawnArgs, {
-    cwd: './dist'
+    cwd: './dist',
+    shell: true
   })
 
   s.stdout.on('data', (data) => {
