@@ -15,7 +15,7 @@
     }
     button.onclick = async () => {
       try {
-        const parsed = await anitomyscript(input.value)
+        const parsed = await anitomyscript([input.value])
         preview.innerText = JSON.stringify(parsed, null, 2)
       } catch (err) {
         preview.innerText = err.message
