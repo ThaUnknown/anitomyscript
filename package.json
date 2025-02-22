@@ -1,6 +1,6 @@
 {
   "name": "anitomyscript",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Pure JavaScript bindings for Anitomy, ported with emscripten",
   "main": "index.js",
   "type": "module",
@@ -9,7 +9,12 @@
     "build": "cross-env NODE_ENV=prod gulp",
     "build:dev": "cross-env NODE_ENV=dev gulp"
   },
-  "files": ["index.js", "dist/anitomyscript.js", "dist/anitomyscript.wasm"],
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "dist/anitomyscript.js",
+    "dist/anitomyscript.wasm"
+  ],
   "types": "index.d.ts",
   "repository": {
     "type": "git",
@@ -24,9 +29,9 @@
   "author": "Thiago Oliveira <thiago_ogt@outlook.com>",
   "contributors": [
     {
-      "name" : "ThaUnknown",
-      "email" : "casistaken@gmail.com",
-      "url" : "https://github.com/ThaUnknown/"
+      "name": "ThaUnknown",
+      "email": "casistaken@gmail.com",
+      "url": "https://github.com/ThaUnknown/"
     }
   ],
   "license": "BSD-2-Clause",
