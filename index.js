@@ -54,11 +54,7 @@ function elements (elements) {
 }
 
 function elementEntry (elements, key) {
-  if (elements.count(key) > 1) {
-    return mapVector(elements.get_all(key))
-  } else {
-    return elements.get(key) || undefined
-  }
+  return mapVector(elements.get_all(key))
 }
 
 function mapArray (array) {
