@@ -33,9 +33,7 @@ export default async function parse (input) {
       const obj = {}
       for (const [cat, field] of pairs) {
         const vec = anit.get_all(cat)
-        const length = vec.size()
-        if (!length) continue
-        obj[field] = Array.from({ length }, (_, j) => vec.get(j))
+        obj[field] = Array.from({ length: vec.size() }, (_, j) => vec.get(j))
       }
       results.push(obj)
     }
