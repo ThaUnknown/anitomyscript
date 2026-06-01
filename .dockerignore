@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+.gitmodules
+.gitattributes
+.vscode
+test
+*.md
+LICENSE

@@ -7,7 +7,8 @@
   "scripts": {
     "test": "mocha test/*.spec.js",
     "build": "cross-env NODE_ENV=prod gulp",
-    "build:dev": "cross-env NODE_ENV=dev gulp"
+    "build:dev": "cross-env NODE_ENV=dev gulp",
+    "build:docker": "docker build -t anitomyscript-builder -f Dockerfile . && docker create --name tmp-extract anitomyscript-builder && docker cp tmp-extract:/out/. dist/ && docker rm tmp-extract"
   },
   "files": [
     "index.js",

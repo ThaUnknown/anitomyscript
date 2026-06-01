@@ -1,78 +1,47 @@
 import AnitomyNative from './dist/anitomyscript.js'
-let anitomyModule
 
-export default async function (file) {
-  if (!Array.isArray(file) && typeof file !== 'string') {
-    return new Error('Input must be either an Array or a string')
+const FIELDS = [
+  'anime_season', 'season_prefix', 'anime_title',
+  'anime_type', 'anime_year', 'audio_term',
+  'device_compatibility', 'episode_number', 'episode_number_alt',
+  'episode_prefix', 'episode_title', 'file_checksum',
+  'file_extension', 'file_name', 'language',
+  'other', 'release_group', 'release_information',
+  'release_version', 'source', 'subtitles',
+  'video_resolution', 'video_term', 'volume_number',
+  'volume_prefix', 'unknown',
+]
+
+let modPromise, pairs
+
+export default async function parse (input) {
+  if (!Array.isArray(input) && typeof input !== 'string') {
+    throw new Error('Input must be either an Array or a string')
   }
 
-  if (anitomyModule) {
-    return parse(file)
-  }
+  const mod = await (modPromise ??= AnitomyNative())
+  pairs ??= FIELDS.map((name, i) => [mod.ElementCategory.values[i], name])
+  const files = typeof input === 'string' ? [input] : input
+  const anit = new mod.Anitomy()
+  const results = []
 
-  anitomyModule = await AnitomyNative()
-  return parse(file)
-}
-
-async function parse (file) {
-  const vector = mapArray(file)
-  const result = mapVector(anitomyModule.parseMultiple(vector))
-  vector.delete()
-  return result.map((each) => elements(each))
-}
-
-function elements (elements) {
-  const returnObj = {
-    anime_season: elementEntry(elements, anitomyModule.ElementCategory.kElementAnimeSeason),
-    season_prefix: elementEntry(elements, anitomyModule.ElementCategory.kElementAnimeSeasonPrefix),
-    anime_title: elementEntry(elements, anitomyModule.ElementCategory.kElementAnimeTitle),
-    anime_type: elementEntry(elements, anitomyModule.ElementCategory.kElementAnimeType),
-    anime_year: elementEntry(elements, anitomyModule.ElementCategory.kElementAnimeYear),
-    audio_term: elementEntry(elements, anitomyModule.ElementCategory.kElementAudioTerm),
-    device_compatibility: elementEntry(elements, anitomyModule.ElementCategory.kElementDeviceCompatibility),
-    episode_number: elementEntry(elements, anitomyModule.ElementCategory.kElementEpisodeNumber),
-    episode_prefix: elementEntry(elements, anitomyModule.ElementCategory.kElementEpisodePrefix),
-    episode_title: elementEntry(elements, anitomyModule.ElementCategory.kElementEpisodeTitle),
-    file_checksum: elementEntry(elements, anitomyModule.ElementCategory.kElementFileChecksum),
-    file_extension: elementEntry(elements, anitomyModule.ElementCategory.kElementFileExtension),
-    file_name: elementEntry(elements, anitomyModule.ElementCategory.kElementFileName),
-    language: elementEntry(elements, anitomyModule.ElementCategory.kElementLanguage),
-    other: elementEntry(elements, anitomyModule.ElementCategory.kElementOther),
-    release_group: elementEntry(elements, anitomyModule.ElementCategory.kElementReleaseGroup),
-    release_information: elementEntry(elements, anitomyModule.ElementCategory.kElementReleaseInformation),
-    release_version: elementEntry(elements, anitomyModule.ElementCategory.kElementReleaseVersion),
-    source: elementEntry(elements, anitomyModule.ElementCategory.kElementSource),
-    subtitles: elementEntry(elements, anitomyModule.ElementCategory.kElementSubtitles),
-    video_resolution: elementEntry(elements, anitomyModule.ElementCategory.kElementVideoResolution),
-    video_term: elementEntry(elements, anitomyModule.ElementCategory.kElementVideoTerm),
-    volume_number: elementEntry(elements, anitomyModule.ElementCategory.kElementVolumeNumber),
-    volume_prefix: elementEntry(elements, anitomyModule.ElementCategory.kElementVolumePrefix),
-    unknown: elementEntry(elements, anitomyModule.ElementCategory.kElementUnknown)
-  }
-  elements.delete()
-  return returnObj
-}
-
-function elementEntry (elements, key) {
-  return mapVector(elements.get_all(key))
-}
-
-function mapArray (array) {
-  const vector = new anitomyModule.StringVector()
-  array.forEach((element, index) => {
-    if (typeof element !== 'string') {
-      throw new Error(`Element at index ${index} is not a string`)
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (typeof file !== 'string') throw new Error(`Element at index ${i} is not a string`)
+      anit.parse(file)
+      const obj = {}
+      for (const [cat, field] of pairs) {
+        const vec = anit.get_all(cat)
+        const length = vec.size()
+        if (!length) continue
+        obj[field] = Array.from({ length }, (_, j) => vec.get(j))
+      }
+      results.push(obj)
     }
-    vector.push_back(element)
-  })
-  return vector
-}
-
-function mapVector (vector) {
-  const array = []
-  for (let index = 0; index < vector.size(); index++) {
-    array.push(vector.get(index))
+  } finally {
+    anit.delete()
   }
-  vector.delete()
-  return array
+
+  return results
 }
